@@ -1,0 +1,4 @@
+# Python packages for the topic grouping script (scripts/topic_bge_gemma.py).
+# Only needed for the Dashboard condition. Tested with sentence-transformers 6.1, scikit-learn 1.9.
+sentence-transformers>=3.0
+scikit-learn>=1.3

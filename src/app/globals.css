@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-primary: #6366F1;
+  --color-primary-light: #818CF8;
+  --color-secondary: #818CF8;
+  --color-cta: #10B981;
+  --color-bg-light: #F5F3FF;
+  --color-bg-dark: #0F172A;
+  --color-text-light: #1E1B4B;
+  --color-text-dark: #E2E8F0;
+  --font-sans: var(--font-plus-jakarta-sans);
+}
+
+/* ── Light mode (default) ── */
+:root {
+  --background: #F5F3FF;
+  --foreground: #1E1B4B;
+  --card-bg: #ffffff;
+  --card-border: #E2E0F5;
+  --muted: #64748B;
+  --navbar-bg: rgba(255, 255, 255, 0.85);
+  --navbar-border: rgba(99, 102, 241, 0.2);
+  --input-bg: #ffffff;
+  --input-border: #CBD5E1;
+  --input-focus-border: #6366F1;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(226, 224, 245, 0.6);
+  color-scheme: light;
+}
+
+/* ── Dark mode ── */
+.dark {
+  --background: #0F172A;
+  --foreground: #E2E8F0;
+  --card-bg: #1E293B;
+  --card-border: #334155;
+  --muted: #64748B;
+  --navbar-bg: rgba(15, 23, 42, 0.85);
+  --navbar-border: rgba(99, 102, 241, 0.25);
+  --input-bg: #1E293B;
+  --input-border: #475569;
+  --input-focus-border: #818CF8;
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(51, 65, 85, 0.5);
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* +15% bump from the default 16px so every rem-based size scales up together. */
+  font-size: 18px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(99, 102, 241, 0.3);
+  color: var(--foreground);
+}
+
+::-moz-selection {
+  background-color: rgba(99, 102, 241, 0.3);
+  color: var(--foreground);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(129, 140, 248, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(129, 140, 248, 0.5);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+}
+
+/* PDF viewer container */
+.pdf-viewer-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: var(--card-bg);
+  border-radius: 0.75rem;
+}
+
+.pdf-viewer-container .react-pdf__Page {
+  display: flex;
+  justify-content: center;
+}
+
+.pdf-viewer-container .react-pdf__Page__canvas {
+  max-width: 100%;
+  height: auto !important;
+}
+
+.pdf-viewer-container .react-pdf__Page__textContent {
+  user-select: text;
+}
+
+/* Animation keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(99, 102, 241, 0);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+  background-size: 200% 100%;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 6s ease infinite;
+  background-size: 200% 200%;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+
+/* PDF evidence highlights */
+mark.pdf-hl {
+  all: unset;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  cursor: default;
+  position: relative;
+}
+
+mark.pdf-hl:hover::after {
+  content: attr(data-criteria);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  color: #ffffff;
+  background: var(--hl-color, #6366F1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--hl-color, #6366F1) 30%, transparent);
+  z-index: 1000;
+  pointer-events: none;
+  animation: fade-in-up 0.15s ease-out;
+}
+
+mark.pdf-hl:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--hl-color, #6366F1);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Focus visible styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #6366F1;
+  outline-offset: 2px;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
