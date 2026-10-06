@@ -20,8 +20,8 @@ A GPU with 8 GB+ of VRAM is recommended. Without one everything works, but gradi
 ## Setup
 
 ```bash
-git clone https://github.com/LuukWell/EssayGrader2.git
-cd EssayGrader2
+git clone https://github.com/LuukWell/CohortEssayGrader.git
+cd CohortEssayGrader
 npm install
 ```
 
