@@ -1,4 +1,4 @@
-# EssayGrader2
+# CohortEssayGrader
 
 An essay grading assistant that runs locally. You grade the essays; a local model (via [Ollama](https://ollama.com)) suggests a score, justification and supporting quotes for each rubric criterion. Quotes are checked against the essay text and flagged if they can't be found.
 
