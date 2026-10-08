@@ -17,7 +17,7 @@ import type { EssayMeta } from '@/types';
 import type { ActionLogger } from '@/lib/action-logger';
 import InfoTooltip from '@/components/ui/info-tooltip';
 
-// Inline types — avoids importing server-only db-helpers in client bundle
+// Defined here because db-helpers is server-only
 export interface TopicData {
   id: number;
   topic_index: number;
@@ -41,8 +41,7 @@ interface CohortDashboardProps {
   actionLogger?: ActionLogger | null;
 }
 
-/* ── helpers ──────────────────────────────────────────────────────────── */
-
+// Helpers
 function parseKeywords(raw: string): string[] {
   try {
     return JSON.parse(raw);
@@ -59,7 +58,7 @@ function statusBadge(status: string): { label: string; cls: string } {
 
 type SortKey = 'filename' | 'grade' | 'wordCount' | 'status' | 'quality';
 
-/* ── Topics panel ─────────────────────────────────────────────────────── */
+// Topics panel
 
 function TopicsPanel({
   topics,
@@ -164,7 +163,7 @@ function TopicsPanel({
   );
 }
 
-/* ── Essays panel ─────────────────────────────────────────────────────── */
+// Essays panel
 
 function EssaysPanel({
   essays,
@@ -185,7 +184,7 @@ function EssaysPanel({
       setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortBy(key);
-      // Numeric sorts default to descending (high → low) since that's the more useful first view.
+      // Numeric sorts start descending, that's the more useful first view.
       const numericKey = key === 'grade' || key === 'wordCount' || key === 'quality';
       setSortDir(numericKey ? 'desc' : 'asc');
     }
@@ -200,7 +199,7 @@ function EssaysPanel({
       if (aNull && bNull) return 0;
       if (aNull) return 1;   // a goes after b
       if (bNull) return -1;  // b goes after a
-      return null;            // both present — caller does numeric compare
+      return null;            // both present, caller compares
     };
 
     let cmp = 0;
@@ -235,7 +234,7 @@ function EssaysPanel({
     return 0;
   });
 
-  // Direction-meaning labels by sort key — what does asc/desc mean here?
+  // What asc/desc means for each sort key
   const dirHint = (k: SortKey, dir: 'asc' | 'desc'): string => {
     if (k === 'filename') return dir === 'asc' ? 'A→Z' : 'Z→A';
     if (k === 'status')   return dir === 'asc' ? 'graded first' : 'pending first';
@@ -342,7 +341,7 @@ function EssaysPanel({
                   />
                 </div>
 
-                {/* Topic reassignment row — only when topics exist */}
+                {/* Topic reassignment (only when there are topics) */}
                 {topics.length > 0 && onTopicChange && (
                   <div
                     className="flex items-center gap-2 border-t border-[var(--card-border)] px-4 py-2"
@@ -376,7 +375,7 @@ function EssaysPanel({
   );
 }
 
-/* ── Stats panel ──────────────────────────────────────────────────────── */
+// Stats panel
 
 function StatsPanel({
   stats,
@@ -541,8 +540,6 @@ function StatsPanel({
   );
 }
 
-/* ── Main export ──────────────────────────────────────────────────────── */
-
 export default function CohortDashboard({
   essays,
   topics,
@@ -553,7 +550,7 @@ export default function CohortDashboard({
 }: CohortDashboardProps) {
   const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
   const [topicsWidth, setTopicsWidth] = useState(256);
-  // Optimistic overrides for topic reassignment (essayId → topicId | null)
+  // Optimistic overrides for topic reassignment (essayId -> topicId | null)
   const [topicOverrides, setTopicOverrides] = useState<Record<string, number | null>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);

@@ -216,7 +216,7 @@ export default function StudySetup({ onComplete }: StudySetupProps) {
             </div>
           </div>
 
-          {/* Pre-computed topics toggle — only for sets the research CSV covers */}
+          {/* Pre-computed topics toggle (only for sets in the research CSV) */}
           {precomputedTopicSets.includes(essaySet) && (
           <label className="flex cursor-pointer items-center justify-between rounded-lg border border-[var(--card-border)] px-4 py-3">
             <div>
@@ -240,7 +240,7 @@ export default function StudySetup({ onComplete }: StudySetupProps) {
           </label>
           )}
 
-          {/* K selector — used by both the CSV and the live BGE + Gemma topic model */}
+          {/* K selector, used for both the CSV and the live topic model */}
           <div className="rounded-lg border border-[var(--card-border)] px-4 py-3">
             <div className="flex items-center justify-between">
               <div>
@@ -298,7 +298,7 @@ export default function StudySetup({ onComplete }: StudySetupProps) {
             </div>
           </label>
 
-          {/* Use cached assessments toggle — only visible when precompute is on */}
+          {/* Use cached assessments toggle (only when precompute is on) */}
           {precomputeGrades && (
             <label className="flex cursor-pointer items-center justify-between rounded-lg border border-[var(--card-border)] px-4 py-3">
               <div>

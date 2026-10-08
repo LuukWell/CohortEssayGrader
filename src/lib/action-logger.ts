@@ -50,7 +50,7 @@ export class ActionLogger {
         }),
       });
     } catch {
-      // Fire-and-forget — never block UI
+      // logging is best-effort
     }
   }
 }

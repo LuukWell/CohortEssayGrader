@@ -1,4 +1,4 @@
-// Server-side only — BGE + Gemma topic modelling (scripts/topic_bge_gemma.py) with a per-set cache.
+// BGE + Gemma topic modelling (scripts/topic_bge_gemma.py), cached per set.
 
 import { spawn } from 'child_process';
 import path from 'path';

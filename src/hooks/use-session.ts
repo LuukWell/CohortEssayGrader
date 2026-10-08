@@ -51,7 +51,7 @@ export function useSession() {
           localStorage.removeItem(INSTANCE_KEY);
           return null;
         }
-        // Server instance matches — verify the session still exists and is not completed.
+        // Same server instance: check the session still exists and isn't completed.
         return fetch(`/api/sessions/${parsed!.sessionId}`)
           .then((r) => (r.ok ? r.json() : null))
           .then((sessData) => {

@@ -34,7 +34,7 @@ function computeTimingMetrics(logs: ActionLogRow[]) {
       ? Math.round((sessionEndMs - sessionStartMs) / 1000)
       : null;
 
-  /* Per-essay time: essay_opened → all_grades_submitted or essay_closed */
+  /* Per-essay time: essay_opened until all_grades_submitted or essay_closed */
   const essayWindows: Record<string, { opened_ms?: number; completed_ms?: number; filename?: string }> = {};
   for (const log of sorted) {
     if (!log.essay_id) continue;
@@ -53,7 +53,7 @@ function computeTimingMetrics(logs: ActionLogRow[]) {
       : null,
   }));
 
-  /* Dashboard time: dashboard_viewed → next non-dashboard-navigation action */
+  /* Dashboard time: dashboard_viewed until the next non-dashboard action */
   const dashboardNavActions = new Set(['topic_selected', 'essay_sort_changed', 'essay_flagged', 'essay_unflagged', 'help_tooltip_opened']);
   let dashboard_time_seconds = 0;
   let lastDashboardMs: number | null = null;
@@ -66,7 +66,7 @@ function computeTimingMetrics(logs: ActionLogRow[]) {
     }
   }
 
-  /* Comparison time: benchmark_comparison_opened → benchmark_comparison_closed */
+  /* Comparison time: benchmark_comparison_opened until benchmark_comparison_closed */
   let comparison_time_seconds = 0;
   let lastComparisonMs: number | null = null;
   const comparison_events: { opened_at: string; closed_at: string; duration_seconds: number }[] = [];

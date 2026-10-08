@@ -49,10 +49,8 @@ export async function GET(
     const summarisedCount = (db.prepare('SELECT COUNT(*) as n FROM essays WHERE session_id = ? AND summary IS NOT NULL').get(id) as { n: number }).n;
     const topicsCount = (db.prepare('SELECT COUNT(*) as n FROM essays WHERE session_id = ? AND topic_id IS NOT NULL').get(id) as { n: number }).n;
     const similaritiesCount = (db.prepare('SELECT COUNT(DISTINCT essay_id_a) as n FROM essay_similarities WHERE session_id = ?').get(id) as { n: number }).n;
-    // Precompute progress: count quality_rank_updated events — the precompute
-    // loop logs exactly one of these per essay after finishing its inner
-    // criteria loop, so this is an accurate count of essays the loop has
-    // fully processed (whether they succeeded, partially-failed, or all-failed).
+    // Precompute progress: the precompute loop logs one quality_rank_updated
+    // event per essay when it's done with it (even if some criteria failed).
     const precomputedCount = (db.prepare(
       "SELECT COUNT(*) as n FROM action_logs WHERE session_id = ? AND action_type = 'quality_rank_updated'"
     ).get(id) as { n: number }).n;

@@ -18,8 +18,6 @@ function splitIntoParagraphs(content: string): string[] {
   return slices;
 }
 
-/* ── Types ──────────────────────────────────────────────────────────────── */
-
 interface EssayDetail {
   id: string;
   filename: string;
@@ -55,7 +53,7 @@ export interface BenchmarkComparisonModalProps {
   actionLogger?: ActionLogger | null;
 }
 
-/* ── Helpers ────────────────────────────────────────────────────────────── */
+// Helpers
 
 function justText(j: string | string[] | null | undefined): string {
   if (!j) return '';
@@ -76,7 +74,7 @@ async function fetchEssayWithGrades(
   return { essay, grade };
 }
 
-/* ── Essay text pane ────────────────────────────────────────────────────── */
+// Essay text pane
 
 function EssayPane({
   label,
@@ -145,7 +143,7 @@ function EssayPane({
   );
 }
 
-/* ── Right panel ────────────────────────────────────────────────────────── */
+// Right panel
 
 function InfoPanel({
   criterionName,
@@ -166,7 +164,6 @@ function InfoPanel({
   const bAiScore = benchmarkData?.grade?.ai_score ?? null;
   const bJustification = benchmarkData?.grade?.ai_justification ?? null;
 
-  const cTeacherScore = currentAssessment?.aiScore != null ? null : null; // teacher score comes from currentAssessment when available
   const cAiScore = currentAssessment?.aiScore ?? currentData?.grade?.ai_score ?? null;
   const cJustification = justText(currentAssessment?.justification) || currentData?.grade?.ai_justification || null;
 
@@ -265,7 +262,7 @@ function InfoPanel({
   );
 }
 
-/* ── Full-screen view ───────────────────────────────────────────────────── */
+// Full-screen view
 
 export default function BenchmarkComparisonModal({
   sessionId,
@@ -317,7 +314,7 @@ export default function BenchmarkComparisonModal({
             </span>
           </div>
 
-          {/* Benchmark selector — only when multiple */}
+          {/* Benchmark selector (only with more than one) */}
           {sortedBenchmarks.length > 1 && (
             <div className="flex items-center gap-1 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-1">
               <button

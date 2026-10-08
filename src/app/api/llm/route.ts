@@ -35,10 +35,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/* ============================================================ */
-/*  Extract Rubric                                               */
-/* ============================================================ */
-
+// Extract Rubric
 async function handleExtractRubric(payload: { rubricContent: string }) {
   const prompt = `If the provided text is not a grading rubric, or you are not confident you can extract meaningful criteria, respond with the string: NO_VALID_RUBRIC (no JSON, no explanation).
 
@@ -74,10 +71,7 @@ CRITICAL: You MUST respond with ONLY valid JSON. No markdown code fences. No exp
   return NextResponse.json({ result: parsed });
 }
 
-/* ============================================================ */
-/*  Grade Single Criterion                                        */
-/* ============================================================ */
-
+// Grade Single Criterion
 async function handleGradeCriterion(payload: {
   essayContent: string;
   criterion: { name: string; id: number; scoreRange: { min: number; max: number }; levels?: { score: number; description: string }[] };
@@ -90,10 +84,7 @@ async function handleGradeCriterion(payload: {
   return NextResponse.json({ result });
 }
 
-/* ============================================================ */
-/*  Overall Assessment                                            */
-/* ============================================================ */
-
+// Overall Assessment
 async function handleOverallAssessment(payload: {
   essayContent: string;
   criteriaWithScores: { name: string; teacherScore?: number | null; aiScore?: number | null; scoreRange: { max: number } }[];
@@ -132,10 +123,7 @@ CRITICAL: Respond with ONLY this JSON object and nothing else:
   return NextResponse.json({ result: parsed });
 }
 
-/* ============================================================ */
-/*  Revise Score                                                  */
-/* ============================================================ */
-
+// Revise Score
 async function handleReviseScore(payload: {
   essayContent: string;
   criterion: { name: string; scoreRange: { min: number; max: number } };
@@ -170,19 +158,13 @@ CRITICAL: Respond with ONLY this JSON object and nothing else:
   return NextResponse.json({ result: parsed });
 }
 
-/* ============================================================ */
-/*  Embedding                                                     */
-/* ============================================================ */
-
+// Embedding
 async function handleGenerateEmbedding(payload: { text: string }) {
   const embedding = await generateEmbeddingServer(payload.text.slice(0, 8000));
   return NextResponse.json({ result: { embedding } });
 }
 
-/* ============================================================ */
-/*  Topic Extraction                                              */
-/* ============================================================ */
-
+// Topic Extraction
 async function handleExtractTopics(payload: {
   essaySummaries: { id: string; summary: string }[];
 }) {

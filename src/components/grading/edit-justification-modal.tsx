@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Sparkles, Plus, Trash2, X } from 'lucide-react';
-import Modal from '@/components/ui/modal';
 
 const MAX_BULLET_LENGTH = 350;
 
@@ -16,10 +15,8 @@ interface JustificationEditorProps {
 }
 
 /**
- * Inline editor for an AI justification. Rendered in-place (e.g. inside the
- * grading workspace's left column) so the right-column essay viewer stays
- * visible while the teacher edits — unlike the modal variant which covers the
- * whole viewport.
+ * Inline editor for an AI justification. Rendered in the left column so the
+ * essay stays visible while the teacher edits.
  */
 export function JustificationEditor({
   initialValue,
@@ -138,43 +135,5 @@ export function JustificationEditor({
         </div>
       </div>
     </div>
-  );
-}
-
-interface EditJustificationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (value: string, bullets?: string[]) => void;
-  initialValue: string;
-  isBullets: boolean;
-  initialBullets?: string[];
-  warningText?: string;
-}
-
-/** Legacy modal wrapper. Prefer rendering `<JustificationEditor>` inline so
- *  the essay viewer remains visible while editing. */
-export default function EditJustificationModal({
-  isOpen,
-  onClose,
-  onSave,
-  initialValue,
-  isBullets,
-  initialBullets = [],
-  warningText = 'Editing will update AI score',
-}: EditJustificationModalProps) {
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Justification" size="2xl">
-      <JustificationEditor
-        initialValue={initialValue}
-        isBullets={isBullets}
-        initialBullets={initialBullets}
-        warningText={warningText}
-        onCancel={onClose}
-        onSave={(v, b) => {
-          onSave(v, b);
-          onClose();
-        }}
-      />
-    </Modal>
   );
 }

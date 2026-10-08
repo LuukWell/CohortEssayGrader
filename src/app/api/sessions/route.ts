@@ -27,10 +27,8 @@ export async function POST(request: NextRequest) {
 
     const db = getDb();
 
-    // Resume on exact match of (participantId, condition, essaySet) if a prior
-    // incomplete session exists. This is strictly additive — the existing row
-    // and all its grades, justifications, and highlights remain untouched, and
-    // we do NOT call loadEssaySet again (which would re-seed essay rows).
+    // Resume an unfinished session with the same participantId, condition and
+    // essaySet. Don't call loadEssaySet here, it would re-seed the essay rows.
     const existing = findResumableSession(participantId, condition, essaySet);
     if (existing) {
       logAction(existing.id, participantId, condition, essaySet, 'session_start', undefined, { resumed: true });

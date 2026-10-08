@@ -121,7 +121,7 @@ export default function ProcessingScreen({ sessionId, onComplete, actionLogger, 
           reject?.(e);
         }
       } catch {
-        // network hiccup — keep polling
+        // ignore and keep polling
       }
     }, 2000);
   }
@@ -231,7 +231,7 @@ export default function ProcessingScreen({ sessionId, onComplete, actionLogger, 
                     )}
                   </div>
                 </div>
-                {/* Progress bar — shown when active */}
+                {/* Progress bar (active step only) */}
                 {active && sub && sub.total > 0 && (
                   <div className="ml-9 mt-1.5 h-1 overflow-hidden rounded-full" style={{ background: 'var(--card-border)' }}>
                     <motion.div

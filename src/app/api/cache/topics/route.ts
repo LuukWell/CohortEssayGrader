@@ -4,7 +4,7 @@ import { getCachedTopicKs } from '@/lib/db-helpers';
 import { TOPIC_EMBED_MODEL, TOPIC_LLM_MODEL } from '@/lib/topic-model';
 import { isEssaySet } from '@/lib/essay-loader';
 
-// GET ?set=C → which k values already have cached BGE + Gemma topics for this set
+// GET ?set=C: the k values that already have cached BGE + Gemma topics for this set
 export async function GET(request: NextRequest) {
   const essaySet = new URL(request.url).searchParams.get('set');
   if (!isEssaySet(essaySet)) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   });
 }
 
-// DELETE ?set=C → clear cached topics for that set (all k); no set → clear all
+// DELETE ?set=C: clear the cached topics for that set (all k), or everything if no set is given
 export async function DELETE(request: NextRequest) {
   const essaySet = new URL(request.url).searchParams.get('set');
   const db = getDb();

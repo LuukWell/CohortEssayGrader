@@ -1,4 +1,4 @@
-// Server-side only — optional research topic assignments (BGE + gemma2:9b, computed offline).
+// Optional research topic assignments (BGE + gemma2:9b, computed offline).
 // The file is not required: without it the "Use pre-computed topics" option is hidden and
 // topics are always computed live (see topic-model.ts).
 
@@ -32,7 +32,7 @@ export function precomputedTopicSets(): string[] {
   return [...sets].sort();
 }
 
-/** Topics + tsv_id → topic index for one set/k; empty when the file or the rows are missing. */
+/** Topics and tsv_id -> topic index for one set/k; empty when the file or the rows are missing. */
 export function loadPrecomputedTopics(essaySet: string, k: number): {
   topics: { label: string; keywords: string[] }[];
   assignments: Record<string, number>;

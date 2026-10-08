@@ -61,10 +61,8 @@ def log(msg: str) -> None:
     print(f"[bge-gemma] {msg}", file=sys.stderr, flush=True)
 
 
-# ---------------------------------------------------------------------------
-# Input: prefer the canonical subset CSV (parsed with the csv module, in the
-# same row order the research run used) so clusters match the evaluated ones.
-# ---------------------------------------------------------------------------
+# Input. Read the subset CSV itself when possible, so the row order (and with it
+# the clusters) matches the research run.
 
 def canonical_essays(essay_set: str, essays: list[dict]) -> list[tuple[str, str]]:
     given = {str(e["id"]): e["text"] for e in essays}
@@ -83,9 +81,7 @@ def canonical_essays(essay_set: str, essays: list[dict]) -> list[tuple[str, str]
     return ordered
 
 
-# ---------------------------------------------------------------------------
 # Preprocessing (preprocess.py)
-# ---------------------------------------------------------------------------
 
 def clean_minimal(texts: list[str]) -> list[str]:
     return [re.sub(r"\s+", " ", t).strip() for t in texts]
@@ -126,9 +122,7 @@ def truncate_words(text: str, max_words: int) -> str:
     return " ".join(text.split()[:max_words])
 
 
-# ---------------------------------------------------------------------------
 # c-TF-IDF (evaluate.extract_top_words_ctfidf)
-# ---------------------------------------------------------------------------
 
 def extract_top_words_ctfidf(tokenized: list[list[str]], labels: list[int], n_words: int = 10) -> list[list[str]]:
     unique_labels = sorted(set(labels))
@@ -154,10 +148,8 @@ def extract_top_words_ctfidf(tokenized: list[list[str]], labels: list[int], n_wo
     return topics
 
 
-# ---------------------------------------------------------------------------
-# Gemma labelling (hybrid._label_cluster) — failures are fatal here so a
+# Gemma labelling (hybrid._label_cluster). Failures are fatal here so a
 # keyword-only fallback label never ends up in the app's cache.
-# ---------------------------------------------------------------------------
 
 def ollama_chat(base_url: str, model: str, prompt: str) -> str:
     body = json.dumps({
@@ -186,9 +178,7 @@ def label_cluster(cluster_texts: list[str], top_words: list[str], model: str, ba
     return label
 
 
-# ---------------------------------------------------------------------------
 # Main
-# ---------------------------------------------------------------------------
 
 def main() -> None:
     parser = argparse.ArgumentParser()

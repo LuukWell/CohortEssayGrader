@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${plusJakartaSans.variable} h-full`} suppressHydrationWarning>
       <head>
-        {/* Inline theme script — hardcoded string, no user input, safe from XSS */}
+        {/* Apply the saved theme before first paint */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');if(t!=='light')document.documentElement.classList.add('dark')}catch(e){}})()` }} />
       </head>
       <body className="min-h-screen font-sans antialiased">{children}</body>

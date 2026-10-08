@@ -6,8 +6,6 @@ import type { ActionLogger } from '@/lib/action-logger';
 import BenchmarkComparisonModal from '@/components/cohort/benchmark-comparison-modal';
 import InfoTooltip from '@/components/ui/info-tooltip';
 
-/* ── Types ──────────────────────────────────────────────────────────────── */
-
 interface SimilarEssay {
   essay_id: string;
   filename: string;
@@ -40,8 +38,6 @@ interface CohortContextPanelProps {
   onOpenEssay?: (essayId: string) => void;
   disableEssayOpen?: boolean;
 }
-
-/* ── Main component ─────────────────────────────────────────────────────── */
 
 export default function CohortContextPanel({
   sessionId,
@@ -121,7 +117,7 @@ export default function CohortContextPanel({
           </p>
         </div>
 
-        {/* ── Similar essays ─────────────────────────────────────────────── */}
+        {/* Similar essays */}
         <div className="p-4">
           <div className="mb-3 flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
@@ -236,7 +232,7 @@ export default function CohortContextPanel({
           )}
         </div>
 
-        {/* ── Benchmarks for current criterion ───────────────────────────── */}
+        {/* Benchmarks for current criterion */}
         {criterionName ? (
           <div className="border-t border-[var(--card-border)] p-4">
             <div className="mb-3 flex items-center justify-between">
@@ -275,7 +271,7 @@ export default function CohortContextPanel({
               ))}
             </div>
 
-            {/* Compare button — only when at least one benchmark is set */}
+            {/* Compare button, once a benchmark is set */}
             {sortedBenchmarks.length > 0 && (
               <button
                 onClick={() => setShowComparison(true)}
@@ -295,7 +291,7 @@ export default function CohortContextPanel({
         )}
       </div>
 
-      {/* ── Benchmark comparison modal ──────────────────────────────────── */}
+      {/* Benchmark comparison modal */}
       {showComparison && criterionName && (
         <BenchmarkComparisonModal
           sessionId={sessionId}

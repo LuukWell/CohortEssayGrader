@@ -1,7 +1,5 @@
 import { getDb } from './db';
 
-// ── Types ──────────────────────────────────────────────────────────────────
-
 export interface Session {
   id: string;
   participant_id: string;
@@ -9,7 +7,7 @@ export interface Session {
   /** Name of the data/subset_<NAME>.csv file the essays came from */
   essay_set: string;
   use_precomputed_topics: number;
-  /** Topic count k — used for both the research CSV and the live BGE + Gemma model. */
+  /** Topic count k, for both the research CSV and the live BGE + Gemma model. */
   precomputed_k: number | null;
   precompute_grades: number;
   grades_precomputed: number;
@@ -105,13 +103,7 @@ export interface SessionStats {
   gradeDistribution: Record<number, number>;
 }
 
-export interface TopicStats {
-  essayCount: number;
-  gradedCount: number;
-  avgGrade: number | null;
-}
-
-// ── Session ────────────────────────────────────────────────────────────────
+// Session
 
 export function createSession(
   participantId: string,
@@ -145,11 +137,6 @@ export function updateSessionStatus(sessionId: string, status: string): void {
   db.prepare('UPDATE sessions SET processing_status = ? WHERE id = ?').run(status, sessionId);
 }
 
-export function updateSessionRubricCriteria(sessionId: string, criteriaJson: string): void {
-  const db = getDb();
-  db.prepare('UPDATE sessions SET rubric_criteria_json = ? WHERE id = ?').run(criteriaJson, sessionId);
-}
-
 export function completeSession(sessionId: string): void {
   const db = getDb();
   db.prepare("UPDATE sessions SET completed_at = CURRENT_TIMESTAMP WHERE id = ?").run(sessionId);
@@ -168,7 +155,7 @@ export function findResumableSession(
   ).get(participantId, condition, essaySet) as Session) ?? null;
 }
 
-// ── Essays ─────────────────────────────────────────────────────────────────
+// Essays
 
 export function createEssay(
   sessionId: string,
@@ -220,7 +207,7 @@ export function updateEssaySummary(essayId: string, summary: string): void {
   db.prepare('UPDATE essays SET summary = ? WHERE id = ?').run(summary, essayId);
 }
 
-// ── Topics ─────────────────────────────────────────────────────────────────
+// Topics
 
 export function createTopic(
   sessionId: string,
@@ -240,7 +227,7 @@ export function getTopicsBySession(sessionId: string): Topic[] {
   return db.prepare('SELECT * FROM topics WHERE session_id = ? ORDER BY topic_index').all(sessionId) as Topic[];
 }
 
-// ── Similarities ───────────────────────────────────────────────────────────
+// Similarities
 
 export function setSimilarity(
   sessionId: string,
@@ -273,7 +260,7 @@ export function getSimilarEssays(sessionId: string, essayId: string, limit = 5):
   `).all(sessionId, essayId, limit) as SimilarEssay[];
 }
 
-// ── Grades ─────────────────────────────────────────────────────────────────
+// Grades
 
 export function upsertGrade(
   sessionId: string,
@@ -329,7 +316,7 @@ export function getGradeForCriterion(sessionId: string, essayId: string, criteri
     .get(sessionId, essayId, criterionName) as Grade) ?? null;
 }
 
-// ── Benchmarks ─────────────────────────────────────────────────────────────
+// Benchmarks
 
 export function setBenchmark(
   sessionId: string,
@@ -364,7 +351,7 @@ export function removeBenchmark(sessionId: string, criterionName: string, type: 
     .run(sessionId, criterionName, type);
 }
 
-// ── Teacher highlights ─────────────────────────────────────────────────────
+// Teacher highlights
 
 export function createTeacherHighlight(
   sessionId: string,
@@ -406,7 +393,7 @@ export function deleteTeacherHighlight(sessionId: string, highlightId: number): 
   return existing;
 }
 
-// ── Logging ────────────────────────────────────────────────────────────────
+// Logging
 
 export function logAction(
   sessionId: string,
@@ -429,7 +416,7 @@ export function logAction(
   );
 }
 
-// ── AI Quality Score ───────────────────────────────────────────────────────
+// AI Quality Score
 
 export function updateEssayAiQuality(essayId: string, sessionId: string): void {
   const db = getDb();
@@ -465,7 +452,7 @@ export function computeQualityRanks(sessionId: string): QualityRank[] {
   return result;
 }
 
-// ── AI Assessment Cache ────────────────────────────────────────────────────
+// AI Assessment Cache
 
 export interface CachedAssessment {
   ai_score: number | null;
@@ -506,7 +493,7 @@ export function setCachedAssessment(
   `).run(tsvId, criterionId, rubricHash, assessmentType, assessmentLength, data.ai_score, data.ai_justification, data.evidence_json);
 }
 
-// ── Summary / embedding cache ──────────────────────────────────────────────
+// Summary / embedding cache
 
 export interface SummaryCache {
   tsv_id: string;
@@ -537,11 +524,11 @@ export function setCachedEmbedding(tsvId: string, embeddingJson: string): void {
   `).run(tsvId, embeddingJson);
 }
 
-// ── Topic model cache (per essay set × k × models) ─────────────────────────
+// Topic model cache (per essay set, k and models)
 
 export interface TopicModelCache {
   topics: { label: string; keywords: string[] }[];
-  /** maps tsv_id → topic_index */
+  /** tsv_id -> topic_index */
   assignments: Record<string, number>;
 }
 
@@ -589,7 +576,7 @@ export function getCachedTopicKs(essaySet: string, embedModel: string, llmModel:
   return rows.map((r) => r.k);
 }
 
-// ── Stats ──────────────────────────────────────────────────────────────────
+// Stats
 
 export function getSessionStats(sessionId: string): SessionStats {
   const db = getDb();
@@ -615,22 +602,4 @@ export function getSessionStats(sessionId: string): SessionStats {
   for (const row of rows) gradeDistribution[row.bucket] = row.cnt;
 
   return { totalEssays, gradedEssays, avgGrade, gradeDistribution };
-}
-
-export function getTopicStats(sessionId: string, topicId: number): TopicStats {
-  const db = getDb();
-
-  const { essayCount } = db.prepare(
-    'SELECT COUNT(*) as essayCount FROM essays WHERE session_id = ? AND topic_id = ?'
-  ).get(sessionId, topicId) as { essayCount: number };
-
-  const { gradedCount } = db.prepare(
-    "SELECT COUNT(*) as gradedCount FROM essays WHERE session_id = ? AND topic_id = ? AND grading_status = 'graded'"
-  ).get(sessionId, topicId) as { gradedCount: number };
-
-  const { avgGrade } = db.prepare(
-    'SELECT AVG(overall_grade) as avgGrade FROM essays WHERE session_id = ? AND topic_id = ? AND overall_grade IS NOT NULL'
-  ).get(sessionId, topicId) as { avgGrade: number | null };
-
-  return { essayCount, gradedCount, avgGrade };
 }

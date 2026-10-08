@@ -1,4 +1,4 @@
-// Server-side only — direct Ollama HTTP calls for API routes and background processing
+// Ollama HTTP calls for the API routes and background processing (server-side)
 
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'mistral';

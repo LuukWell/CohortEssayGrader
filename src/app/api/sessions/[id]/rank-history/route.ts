@@ -22,10 +22,9 @@ export async function GET(
       return { timestamp: row.timestamp, ranks };
     });
 
-    // Skip precompute build-up snapshots (where some essays still have null
-    // avgAiScore). Only "complete" snapshots — every essay scored — represent
-    // meaningful ranking state. Then collapse consecutive identical-rank
-    // snapshots so the table shows actual movement, not redundant logs.
+    // Only keep snapshots where every essay has an avgAiScore (skips the ones
+    // logged while precompute is still running), then drop consecutive
+    // duplicates so the table only shows actual changes.
     const completeSnapshots = parsed.filter(s => s.ranks.length > 0 && s.ranks.every(r => r.avgAiScore !== null));
 
     const snapshots: typeof completeSnapshots = [];

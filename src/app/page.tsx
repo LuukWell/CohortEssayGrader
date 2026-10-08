@@ -99,7 +99,7 @@ export default function Home() {
     [setSession],
   );
 
-  // Called when the DC processing pipeline finishes — fetch fresh data then show cohort
+  // DC pipeline finished: fetch fresh data, then show the cohort view
   const handleProcessingComplete = useCallback(() => {
     if (!session) return;
     fetch(`/api/sessions/${session.sessionId}`)

@@ -26,9 +26,8 @@ export default function AssessmentSection({
   setHoveredAssessmentIndexes,
   onEditClick,
 }: AssessmentSectionProps) {
-  /* Use justification as the display source — revisedAssessmentText is
-     now only used for the revision API, justification is always kept
-     up-to-date with the latest content (bullets or flow text). */
+  // justification always has the latest text (bullets or flow);
+  // revisedAssessmentText is only used for the revision API.
   const displayText = currentAssessment.justification;
 
   const justificationText = Array.isArray(displayText)

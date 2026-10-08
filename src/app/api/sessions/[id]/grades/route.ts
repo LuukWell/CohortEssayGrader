@@ -53,9 +53,8 @@ export async function POST(
       evidence_json: evidence_json ?? null,
     });
 
-    // If a teacher score was provided, promote the essay's status from 'pending'
-    // → 'grading' so the cohort dashboard reflects partial progress. Don't touch
-    // essays already marked 'graded' (finishGrading handles that transition).
+    // Once there's a teacher score, move the essay from 'pending' to 'grading' so
+    // the cohort dashboard shows partial progress. 'graded' is set by finishGrading.
     if (teacher_score !== undefined && teacher_score !== null) {
       const db = getDb();
       db.prepare(`

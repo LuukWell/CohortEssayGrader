@@ -63,7 +63,7 @@ function migrate(db: Database.Database): void {
     `);
     db.pragma('foreign_keys = ON');
   } else if (sessInfo) {
-    // Table exists but already widened — add any missing columns
+    // Already widened, just add any missing columns
     const sessCols = db.prepare("PRAGMA table_info(sessions)").all() as { name: string }[];
     if (!sessCols.some((c) => c.name === 'use_precomputed_topics')) {
       db.exec('ALTER TABLE sessions ADD COLUMN use_precomputed_topics INTEGER NOT NULL DEFAULT 0');

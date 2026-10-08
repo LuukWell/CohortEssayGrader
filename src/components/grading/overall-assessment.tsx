@@ -96,7 +96,7 @@ export default function OverallAssessment({
         />
       </div>
 
-      {/* Final Score — average teacher score scaled to a /10 grade with pass/fail */}
+      {/* Final score: average teacher score on a /10 scale, with pass/fail */}
       {(() => {
         const incomplete = teacherScoreValues.length < criteriaAssessments.length;
         const finalScore = averageTeacherScore !== null

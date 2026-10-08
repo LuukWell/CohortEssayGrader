@@ -26,10 +26,7 @@ import HallucinationPanel from '@/components/grading/hallucination-panel';
 import { JustificationEditor } from '@/components/grading/edit-justification-modal';
 import OverallAssessment from '@/components/grading/overall-assessment';
 
-/* -------------------------------------------------------------------------- */
-/*  Essay text highlight type (replaces PDF highlight)                         */
-/* -------------------------------------------------------------------------- */
-
+// Highlight types for the essay text viewer
 export interface PdfHighlight { text: string; criterionName: string; }
 
 export interface TeacherHighlightView {
@@ -40,10 +37,7 @@ export interface TeacherHighlightView {
   text: string;
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Essay text viewer with inline quote highlighting                           */
-/* -------------------------------------------------------------------------- */
-
+// Essay text viewer with inline quote highlighting
 const CRITERION_HIGHLIGHT_COLORS: Record<string, string> = {
   'Content':      'bg-yellow-200/70 dark:bg-yellow-700/40',
   'Organization': 'bg-blue-200/70  dark:bg-blue-700/40',
@@ -97,7 +91,7 @@ function buildSegments(
     return 0;
   });
 
-  // Merge overlapping ranges of the SAME source; teacher highlights win when
+  // Merge overlapping ranges of the same source; teacher highlights win when
   // they overlap an AI highlight.
   const merged: Range[] = [];
   for (const r of ranges) {
@@ -364,9 +358,8 @@ function EssayTextViewer({
             className={`whitespace-pre-wrap font-serif text-gray-800 dark:text-slate-200 ${TEXT_SIZE_CLS[textSize]}`}
           >
             {(() => {
-              // Render segments procedurally so paragraph-break positions can
-              // interleave <br/><br/> WITHOUT inserting any text node — which
-              // would shift the text-node offsets that `computeOffset` walks.
+              // Paragraph breaks are <br/><br/> between segments rather than text,
+              // so the text-node offsets that `computeOffset` walks stay correct.
               const out: React.ReactNode[] = [];
               let pos = 0;
               let key = 0;
@@ -461,13 +454,8 @@ function EssayTextViewer({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Props                                                                      */
-/* -------------------------------------------------------------------------- */
-
 export interface InteractiveGradingProps {
   /* data */
-  pdfFile: string | null;
   pdfContent: string;
   rubricContent: string;
   rubricCriteria: Criterion[];
@@ -518,12 +506,7 @@ export interface InteractiveGradingProps {
   sessionId?: string | null;
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Component                                                                  */
-/* -------------------------------------------------------------------------- */
-
 export default function InteractiveGrading({
-  pdfFile,
   pdfContent,
   rubricContent,
   rubricCriteria,
@@ -561,7 +544,7 @@ export default function InteractiveGrading({
   essayId,
   sessionId,
 }: InteractiveGradingProps) {
-  /* ---- internal state ---- */
+  // internal state
   const [editingJustification, setEditingJustification] = useState(false);
   const [textSize, setTextSize] = useState<TextSize>('md');
   const [showAIHighlights, setShowAIHighlights] = useState(false);
@@ -579,7 +562,7 @@ export default function InteractiveGrading({
   const [showEvidence, setShowEvidence] = useState(false);
   const [hoveredEvidenceIndex, setHoveredEvidenceIndex] = useState<number | null>(null);
 
-  /* ---- draggable split pane ---- */
+  // draggable split pane
   const [leftPct, setLeftPct] = useState(60);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -606,7 +589,7 @@ export default function InteractiveGrading({
     document.addEventListener('mouseup', onUp);
   }, []);
 
-  /* ---- derived ---- */
+  // derived
   const criterion = rubricCriteria[currentCriterionIndex] ?? null;
   const criterionId = criterion?.name ?? '';
   const assessment = criterionId ? criteriaAssessments[criterionId] : undefined;
@@ -625,7 +608,7 @@ export default function InteractiveGrading({
     return opts;
   }, [criterion]);
 
-  /* ---- build highlights from all assessed criteria evidence + justification quotes ---- */
+  // build highlights from all assessed criteria evidence + justification quotes
   const pdfHighlights = useMemo<PdfHighlight[]>(() => {
     const result: PdfHighlight[] = [];
     for (const [name, a] of Object.entries(criteriaAssessments)) {
@@ -659,7 +642,7 @@ export default function InteractiveGrading({
     return result;
   }, [criteriaAssessments]);
 
-  /* ---- loading state detection ---- */
+  // loading state detection
   const isInitialLoading = rubricCriteria.length > 0 && Object.keys(criteriaAssessments).length === 0;
   const isCriterionLoading = criterion != null && !assessment;
 
@@ -756,10 +739,6 @@ export default function InteractiveGrading({
     }
   }, [sessionId, teacherHighlights, actionLogger, essayId]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  handleSaveJustification                                                    */
-  /* -------------------------------------------------------------------------- */
-
   const handleSaveJustification = useCallback(
     async (newJustification: string, newBullets: string[]) => {
       if (!criterion || !assessment) return;
@@ -834,10 +813,6 @@ export default function InteractiveGrading({
     [criterion, assessment, criterionId, assessmentType, pdfContent, setCriteriaAssessments]
   );
 
-  /* -------------------------------------------------------------------------- */
-  /*  handleFinishGrading                                                        */
-  /* -------------------------------------------------------------------------- */
-
   const handleFinishGrading = useCallback(async () => {
     setIsFinishing(true);
     setGradingError(null);
@@ -857,10 +832,6 @@ export default function InteractiveGrading({
     }
   }, [criterion, assessment, gradeCurrentCriterion, rubricCriteria, currentCriterionIndex, finishGrading]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  handleNext                                                                 */
-  /* -------------------------------------------------------------------------- */
-
   const handleNext = useCallback(async () => {
     setIsProcessing(true);
     setGradingError(null);
@@ -874,10 +845,7 @@ export default function InteractiveGrading({
     }
   }, [moveToNextCriterion]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  Render: Overall assessment (grading complete)                              */
-  /* -------------------------------------------------------------------------- */
-
+  // Grading complete: show the overall assessment
   if (gradingComplete && overallAssessment) {
     const assessmentsArray = rubricCriteria.map((c) => criteriaAssessments[c.name]).filter(Boolean);
     return (
@@ -892,23 +860,14 @@ export default function InteractiveGrading({
     );
   }
 
-  /* -------------------------------------------------------------------------- */
-  /*  Render: Initial loading                                                    */
-  /* -------------------------------------------------------------------------- */
-
-  /* -------------------------------------------------------------------------- */
-  /*  Render: main grading UI                                                    */
-  /* -------------------------------------------------------------------------- */
-
+  // Main grading UI
   const previousScore = assessment?.originalAiScore ?? null;
   const revisionRationale = assessment?.revisionRationale ?? null;
   const progressPct = totalCriteria > 0 ? ((currentCriterionIndex + 1) / totalCriteria) * 100 : 0;
 
   return (
     <div ref={containerRef} className="flex h-[calc(100vh-4rem)] w-full">
-      {/* ============================================================ */}
-      {/*  LEFT COLUMN — Grading Controls                              */}
-      {/* ============================================================ */}
+      {/* Left column: grading controls */}
       <div className="relative flex flex-col overflow-y-auto border-r border-gray-200 dark:border-slate-700" style={{ width: `${leftPct}%` }}>
         {/* Error banner */}
         <AnimatePresence>
@@ -934,7 +893,7 @@ export default function InteractiveGrading({
         </AnimatePresence>
 
         <div className="space-y-6 p-6">
-          {/* ---- Progress bar ---- */}
+          {/* Progress bar */}
           <div>
             <div className="mb-2 flex items-center justify-between text-sm">
               <span className="font-semibold text-[#1E1B4B] dark:text-[#E2E8F0]">
@@ -954,7 +913,7 @@ export default function InteractiveGrading({
             </div>
           </div>
 
-          {/* ---- Flow / Bullet toggle ---- */}
+          {/* Flow / Bullet toggle */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-400 dark:text-slate-500">Format:</span>
             <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 dark:border-slate-700 dark:bg-slate-800">
@@ -983,7 +942,7 @@ export default function InteractiveGrading({
             </div>
           </div>
 
-          {/* ---- Criterion card ---- */}
+          {/* Criterion card */}
           {criterion && (
             <motion.div
               key={criterionId}
@@ -1016,7 +975,7 @@ export default function InteractiveGrading({
             </motion.div>
           )}
 
-          {/* ---- Error with retry ---- */}
+          {/* Error with retry */}
           {assessment?.error && (
             <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800/40 dark:bg-red-950/20">
               <div className="flex items-center gap-2">
@@ -1069,7 +1028,7 @@ export default function InteractiveGrading({
             </div>
           )}
 
-          {/* ---- Assessment section (or inline editor) ---- */}
+          {/* Assessment section (or inline editor) */}
           {assessment && !assessment.error && !editingJustification && (
             <AssessmentSection
               assessmentType={assessmentType}
@@ -1104,7 +1063,7 @@ export default function InteractiveGrading({
             />
           )}
 
-          {/* ---- Evidence section ---- */}
+          {/* Evidence section */}
           {assessment && !assessment.error && (
             <EvidenceSection
               showEvidence={showEvidence}
@@ -1117,7 +1076,7 @@ export default function InteractiveGrading({
             />
           )}
 
-          {/* ---- Hallucination panel ---- */}
+          {/* Hallucination panel */}
           {assessment && !assessment.error && (
             <HallucinationPanel
               essayContent={pdfContent}
@@ -1141,9 +1100,7 @@ export default function InteractiveGrading({
             />
           )}
 
-          {/* Hallucination warning popup removed - panel handles detection */}
-
-          {/* ---- Scoring section ---- */}
+          {/* Scoring section */}
           {criterion && assessment && (
             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">
@@ -1172,7 +1129,7 @@ export default function InteractiveGrading({
                     ))}
                   </select>
 
-                  {/* Benchmark button — only in DC condition, only when teacher score assigned */}
+                  {/* Benchmark button (DC only, after the teacher has scored) */}
                   {onSetBenchmark && teacherScore !== null && (
                     benchmarkJustSet ? (
                       <div className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
@@ -1265,7 +1222,7 @@ export default function InteractiveGrading({
             </div>
           )}
 
-          {/* ---- Teacher justification ---- */}
+          {/* Teacher justification */}
           {criterion && assessment && (
             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <label className="mb-2 block text-sm font-medium text-[#1E1B4B] dark:text-[#E2E8F0]">
@@ -1281,7 +1238,7 @@ export default function InteractiveGrading({
             </div>
           )}
 
-          {/* ---- Navigation row ---- */}
+          {/* Navigation row */}
           <div className="flex items-center justify-between border-t border-gray-200 pt-4 dark:border-slate-700">
             <button
               onClick={moveToPreviousCriterion}
@@ -1325,7 +1282,7 @@ export default function InteractiveGrading({
           </div>
         </div>
 
-        {/* ---- Criterion loading overlay ---- */}
+        {/* Criterion loading overlay */}
         <AnimatePresence>
           {isCriterionLoading && (
             <motion.div
@@ -1350,7 +1307,7 @@ export default function InteractiveGrading({
           )}
         </AnimatePresence>
 
-        {/* ---- Processing overlay ---- */}
+        {/* Processing overlay */}
         <AnimatePresence>
           {(isProcessing || isFinishing) && !isCriterionLoading && (
             <motion.div
@@ -1370,9 +1327,6 @@ export default function InteractiveGrading({
         </AnimatePresence>
       </div>
 
-      {/* ============================================================ */}
-      {/*  RIGHT COLUMN — PDF Viewer (40%)                             */}
-      {/* ============================================================ */}
       {/* Draggable divider */}
       <div
         onMouseDown={handleDividerMouseDown}
@@ -1381,7 +1335,7 @@ export default function InteractiveGrading({
         <div className="h-8 w-1 rounded-full bg-gray-400 transition-colors group-hover:bg-[#6366F1] dark:bg-slate-500 dark:group-hover:bg-[#818CF8]" />
       </div>
 
-      {/* RIGHT COLUMN — Essay text viewer */}
+      {/* Essay text */}
       <div className="h-full overflow-hidden" style={{ width: `${100 - leftPct}%` }}>
         <EssayTextViewer
           content={pdfContent}

@@ -52,15 +52,12 @@ export async function POST(
   return NextResponse.json({ status: 'processing' }, { status: 202 });
 }
 
-/* ------------------------------------------------------------------ */
-/*  Pipeline                                                            */
-/* ------------------------------------------------------------------ */
-
+// Pipeline
 async function runPipeline(sessionId: string, essaySet: string): Promise<void> {
   const session = getSession(sessionId)!;
   const essays = getEssaysBySession(sessionId);
 
-  // Step A — Summaries (use cache keyed by TSV row ID from filename "essay-{id}")
+  // Step A: summaries (cached by TSV row ID, taken from the filename "essay-{id}")
   updateSessionStatus(sessionId, 'summarising');
 
   for (const essay of essays) {
@@ -77,7 +74,7 @@ async function runPipeline(sessionId: string, essaySet: string): Promise<void> {
     updateEssaySummary(essay.id, summary);
   }
 
-  // Step B — Topics
+  // Step B: topics
   updateSessionStatus(sessionId, 'topics');
   const existingTopics = getTopicsBySession(sessionId);
   console.log(`[topics] essays=${essays.length}, existingTopics=${existingTopics.length}`);
@@ -130,7 +127,7 @@ async function runPipeline(sessionId: string, essaySet: string): Promise<void> {
   } else {
     // Topics already exist from a previous run.
     // Assign any stragglers to the most-populated existing topic.
-    // Do NOT re-run topic modelling — new indices would be incompatible with existing DB rows.
+    // Don't re-run topic modelling, the new indices wouldn't match the existing DB rows.
     const unassigned = essays.filter((e) => e.topic_id == null);
     if (unassigned.length > 0) {
       const topicCounts: Record<number, number> = {};
@@ -152,7 +149,7 @@ async function runPipeline(sessionId: string, essaySet: string): Promise<void> {
     }
   }
 
-  // Step C — Embeddings + pairwise similarities (use cache keyed by TSV row ID)
+  // Step C: embeddings + pairwise similarities (cached by TSV row ID)
   updateSessionStatus(sessionId, 'similarities');
   const embeddings: { id: string; vec: number[] }[] = [];
 

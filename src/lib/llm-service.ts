@@ -3,20 +3,11 @@ import type {
   ContextItem,
   AssessmentType,
   AssessmentLength,
-  OverallAssessmentResult,
 } from '@/types';
 
 interface GradeSingleCriterionOptions {
   assessmentType?: AssessmentType;
   assessmentLength?: AssessmentLength;
-  [key: string]: unknown;
-}
-
-interface CriterionWithScore {
-  name: string;
-  teacherScore?: number | null;
-  aiScore?: number | null;
-  scoreRange: { max: number };
   [key: string]: unknown;
 }
 
@@ -37,11 +28,6 @@ interface ReviseResult {
   error?: string;
 }
 
-interface TopicResult {
-  topics: { label: string; keywords: string[] }[];
-  assignments: Record<string, number>;
-}
-
 async function callApi(action: string, payload: Record<string, unknown>) {
   const res = await fetch('/api/llm', {
     method: 'POST',
@@ -57,12 +43,6 @@ async function callApi(action: string, payload: Record<string, unknown>) {
   const data = await res.json();
   return data.result;
 }
-
-export const extractRubricCriteria = async (
-  rubricContent: string
-): Promise<Criterion[] | 'NO_VALID_RUBRIC'> => {
-  return callApi('extractRubricCriteria', { rubricContent });
-};
 
 export const gradeSingleCriterion = async (
   essayContent: string,
@@ -90,28 +70,6 @@ export const gradeSingleCriterion = async (
   }
 };
 
-export const generateOverallAssessment = async (
-  essayContent: string,
-  criteriaWithScores: CriterionWithScore[],
-  _options: Record<string, unknown> = {},
-  contextList?: ContextItem[]
-): Promise<OverallAssessmentResult> => {
-  try {
-    return await callApi('generateOverallAssessment', {
-      essayContent,
-      criteriaWithScores,
-      contextList,
-    });
-  } catch {
-    return {
-      strengths: 'There was an error generating the overall assessment.',
-      improvements: 'Please review the individual criteria scores.',
-      overallGrade: 'N/A',
-      advice: 'Consider reviewing each criterion individually.',
-    };
-  }
-};
-
 export const reviseCriterionScoreWithJustification = async (
   essayContent: string,
   criterion: Criterion,
@@ -134,25 +92,3 @@ export const reviseCriterionScoreWithJustification = async (
     };
   }
 };
-
-export const generateEmbedding = async (text: string): Promise<number[]> => {
-  const result = await callApi('generateEmbedding', { text });
-  return result.embedding ?? [];
-};
-
-export const extractTopics = async (
-  summaries: { id: string; summary: string }[]
-): Promise<TopicResult> => {
-  return callApi('extractTopics', { essaySummaries: summaries });
-};
-
-const llmService = {
-  extractRubricCriteria,
-  gradeSingleCriterion,
-  generateOverallAssessment,
-  reviseCriterionScoreWithJustification,
-  generateEmbedding,
-  extractTopics,
-};
-
-export default llmService;

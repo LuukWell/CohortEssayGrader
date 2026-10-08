@@ -1,4 +1,4 @@
-// Server-side only — shared grading logic used by both the /api/llm route and the precomputation pipeline.
+// Grading logic shared by /api/llm and the precompute pipeline (server-side).
 import { callOllamaServer, cleanJsonObject } from '@/lib/ollama-server';
 
 export const GRADING_SYSTEM_PROMPT = `You are a strict essay grader for a masters level course. Hold students to a high standard. If something is weak, say so plainly. If something is good, say so briefly. Do not use fancy language, filler words, or unnecessary adjectives. Write like you are talking to the student directly — short sentences, plain English.

@@ -1,11 +1,7 @@
 /**
- * Heuristic paragraph-break detector for essay content.
- *
- * Essays often arrive as a single continuous string with no internal newlines.
- * This module returns the character offsets at which a paragraph break should
- * be rendered, WITHOUT mutating the underlying content — preserving AI-evidence
- * `indexOf(quote)` lookups and teacher-highlight `start_index`/`end_index`
- * stability.
+ * Guesses where the paragraph breaks are in an essay. Many essays come in as one
+ * long string, so this returns break offsets instead of changing the text:
+ * quote lookups and highlight start/end indices depend on the original content.
  */
 
 const DISCOURSE_MARKERS: string[] = [
@@ -73,7 +69,7 @@ export function detectParagraphBreaks(content: string): number[] {
 
   const breaks = new Set<number>();
 
-  // 1. Defensive: any existing run of newlines is a forced break.
+  // 1. Existing newlines are always breaks.
   const nlRe = /\n+/g;
   let nm: RegExpExecArray | null;
   while ((nm = nlRe.exec(content)) !== null) {

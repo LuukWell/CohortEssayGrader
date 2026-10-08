@@ -34,10 +34,6 @@ import AssessmentSettings from '@/components/grading/assessment-settings';
 import InteractiveGrading from '@/components/grading/interactive-grading';
 import CohortContextPanel from '@/components/cohort/cohort-context-panel';
 
-/* -------------------------------------------------------------------------- */
-/*  Types                                                                       */
-/* -------------------------------------------------------------------------- */
-
 interface SavedGrade {
   criterion_name: string;
   criterion_id: number;
@@ -50,10 +46,6 @@ interface SavedGrade {
 }
 
 type PendingAction = 'auto-start' | { grades: SavedGrade[] } | null;
-
-/* -------------------------------------------------------------------------- */
-/*  Props                                                                      */
-/* -------------------------------------------------------------------------- */
 
 export interface GradingWorkspaceProps {
   recorder: CsvRecorder;
@@ -73,10 +65,7 @@ export interface GradingWorkspaceProps {
   onLlmActiveChange?: (active: boolean) => void;
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Step indicator                                                             */
-/* -------------------------------------------------------------------------- */
-
+// Step indicator
 const STEPS: { key: WorkflowStep; label: string }[] = [
   { key: 'welcome', label: 'Welcome' },
   { key: 'rubric', label: 'Rubric' },
@@ -127,10 +116,7 @@ function StepIndicator({ currentStep }: { currentStep: WorkflowStep }) {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Step wrapper with navigation                                               */
-/* -------------------------------------------------------------------------- */
-
+// Step wrapper with navigation
 function StepContainer({
   children,
   onBack,
@@ -177,19 +163,12 @@ function StepContainer({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Slide animation                                                            */
-/* -------------------------------------------------------------------------- */
-
+// Slide animation
 const slideVariants = {
   initial: { opacity: 0, x: 40 },
   animate: { opacity: 1, x: 0, transition: { duration: 0.25 } },
   exit: { opacity: 0, x: -40, transition: { duration: 0.15 } },
 };
-
-/* -------------------------------------------------------------------------- */
-/*  Component                                                                  */
-/* -------------------------------------------------------------------------- */
 
 export default function GradingWorkspace({
   recorder,
@@ -208,52 +187,51 @@ export default function GradingWorkspace({
   onEssayGraded,
   onLlmActiveChange,
 }: GradingWorkspaceProps) {
-  /* ---- workflow step ---- */
+  // workflow step
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('welcome');
 
-  /* ---- core data state ---- */
-  const [essayFile, setEssayFile] = useState<string | null>(null);
+  // core data state
   const [essayFileName, setEssayFileName] = useState<string | null>(null);
   const [pdfContent, setPdfContent] = useState<string>('');
   const [rubricContent, setRubricContent] = useState<string>('');
   const [rubricCriteria, setRubricCriteria] = useState<Criterion[]>(RUBRIC_CRITERIA);
   const [criteriaAssessments, setCriteriaAssessments] = useState<Record<string, Assessment>>({});
 
-  /* ---- grading navigation state ---- */
+  // grading navigation state
   const [currentCriterionIndex, setCurrentCriterionIndex] = useState<number>(0);
   const [teacherScores, setTeacherScores] = useState<Record<string, number | null>>({});
   const [showAIScores, setShowAIScores] = useState<Record<string, boolean>>({});
   const [gradingComplete, setGradingComplete] = useState<boolean>(false);
   const [overallAssessment, setOverallAssessment] = useState<OverallAssessmentResult | null>(null);
 
-  /* ---- settings state ---- */
+  // settings state
   const [contextList, setContextList] = useState<ContextItem[]>([]);
   const [assessmentType, setAssessmentType] = useState<AssessmentType>('flow');
   const [assessmentLength, setAssessmentLength] = useState<AssessmentLength>('medium');
   const [hallucinationThreshold, setHallucinationThreshold] = useState<HallucinationThreshold>('medium');
 
-  /* ---- UI state ---- */
+  // UI state
   const [ollamaError, setOllamaError] = useState<string | null>(null);
   const [isLlmActive, setIsLlmActive] = useState(false);
 
-  /* ---- timing ---- */
+  // timing
   const [criterionStartTime, setCriterionStartTime] = useState<number | null>(null);
 
-  /* ---- pdf evidence highlight ---- */
+  // pdf evidence highlight
   const [activePdfEvidence, setActivePdfEvidence] = useState<Evidence | null>(null);
 
-  /* ---- teacher justifications ---- */
+  // teacher justifications
   const [teacherJustifications, setTeacherJustifications] = useState<Record<string, string>>({});
 
-  /* ---- hallucination tracking ---- */
+  // hallucination tracking
   const [hallucinationCounts, setHallucinationCounts] = useState<
     Record<string, { detected: number; confirmed: number; reported: number }>
   >({});
 
-  /* ---- pending action from grade fetch (restore or auto-start) ---- */
+  // pending action from grade fetch (restore or auto-start)
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  /* ---- ref to prevent duplicate grading ---- */
+  // ref to prevent duplicate grading
   const gradingInProgress = useRef<Set<number>>(new Set());
 
   /* Sync LLM active state to parent */
@@ -261,21 +239,15 @@ export default function GradingWorkspace({
     onLlmActiveChange?.(isLlmActive);
   }, [isLlmActive, onLlmActiveChange]);
 
-  /* ---- ref to detect essay changes ---- */
+  // ref to detect essay changes
   const prevEssayIdRef = useRef<string | null>(null);
 
-  /* -------------------------------------------------------------------------- */
-  /*  Populate rubric from preloaded study data                                  */
-  /* -------------------------------------------------------------------------- */
-
+  // Populate rubric from preloaded study data
   useEffect(() => {
     if (preloadedRubric) setRubricContent(preloadedRubric);
   }, [preloadedRubric]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  Essay change: seamless switching with grade restoration                    */
-  /* -------------------------------------------------------------------------- */
-
+  // When the essay changes, reset state and restore saved grades
   useEffect(() => {
     if (!preloadedEssay) return;
 
@@ -327,10 +299,6 @@ export default function GradingWorkspace({
 
     return () => { cancelled = true; };
   }, [preloadedEssay?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /* -------------------------------------------------------------------------- */
-  /*  gradeCurrentCriterion                                                      */
-  /* -------------------------------------------------------------------------- */
 
   const gradeCurrentCriterion = useCallback(
     async (criteria: Criterion[], index: number) => {
@@ -384,10 +352,7 @@ export default function GradingWorkspace({
     [pdfContent, rubricContent, contextList, assessmentType, assessmentLength],
   );
 
-  /* -------------------------------------------------------------------------- */
-  /*  Process pending action once pdfContent is ready                            */
-  /* -------------------------------------------------------------------------- */
-
+  // Process pending action once pdfContent is ready
   useEffect(() => {
     if (!pendingAction || !pdfContent) return;
 
@@ -449,25 +414,7 @@ export default function GradingWorkspace({
     }
   }, [pendingAction, pdfContent, gradeCurrentCriterion, actionLogger, preloadedEssay?.id]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  PDF extraction — auto-extract when essayFile changes (standalone mode)    */
-  /* -------------------------------------------------------------------------- */
-
-  useEffect(() => {
-    if (!essayFile) return;
-    let cancelled = false;
-    (async () => {
-      const { extractTextFromPdf } = await import('@/lib/pdf-utils');
-      const text = await extractTextFromPdf(essayFile);
-      if (!cancelled && text) setPdfContent(text);
-    })();
-    return () => { cancelled = true; };
-  }, [essayFile]);
-
-  /* -------------------------------------------------------------------------- */
-  /*  startInteractiveGrading (used in settings step for standalone/re-grade)   */
-  /* -------------------------------------------------------------------------- */
-
+  // Start grading from the settings step
   const startInteractiveGrading = useCallback(() => {
     if (!pdfContent) return;
     const criteria = rubricCriteria;
@@ -486,36 +433,21 @@ export default function GradingWorkspace({
       .catch(console.error);
   }, [pdfContent, rubricCriteria, gradeCurrentCriterion, actionLogger, preloadedEssay?.id]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  handleTeacherScoreInput                                                    */
-  /* -------------------------------------------------------------------------- */
-
   const handleTeacherScoreInput = useCallback((criterionId: string, score: number) => {
     setTeacherScores((prev) => ({ ...prev, [criterionId]: score }));
     actionLogger?.log('teacher_score_assigned', { criterionId, score }, preloadedEssay?.id);
   }, [actionLogger, preloadedEssay?.id]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  revealAIScore                                                              */
-  /* -------------------------------------------------------------------------- */
-
   const revealAIScore = useCallback((criterionId: string) => {
     setShowAIScores((prev) => ({ ...prev, [criterionId]: true }));
   }, []);
-
-  /* -------------------------------------------------------------------------- */
-  /*  handleTeacherJustificationInput                                            */
-  /* -------------------------------------------------------------------------- */
 
   const handleTeacherJustificationInput = useCallback((criterionId: string, text: string) => {
     setTeacherJustifications((prev) => ({ ...prev, [criterionId]: text }));
     actionLogger?.log('teacher_justification_written', { criterionId }, preloadedEssay?.id);
   }, [actionLogger, preloadedEssay?.id]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  persistGrade — fire-and-forget grade upsert to SQLite                     */
-  /* -------------------------------------------------------------------------- */
-
+  // Save a grade to SQLite (fire-and-forget)
   const persistGrade = useCallback((
     criterion: { id: number; name: string },
     assessment: Assessment,
@@ -543,10 +475,7 @@ export default function GradingWorkspace({
     }).catch(console.error);
   }, [studySession, preloadedEssay]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  handleSetBenchmark — DC: mark current essay as benchmark for this criterion */
-  /* -------------------------------------------------------------------------- */
-
+  // DC: mark the current essay as the benchmark for this criterion
   const handleSetBenchmark = useCallback(async () => {
     if (!studySession || !preloadedEssay) return;
     const criterion = rubricCriteria[currentCriterionIndex];
@@ -566,10 +495,6 @@ export default function GradingWorkspace({
     }).catch(console.error);
     actionLogger?.log('benchmark_set', { criterionName: criterion.name, type: String(score) }, preloadedEssay.id);
   }, [studySession, preloadedEssay, rubricCriteria, currentCriterionIndex, teacherScores, actionLogger]);
-
-  /* -------------------------------------------------------------------------- */
-  /*  moveToNextCriterion                                                        */
-  /* -------------------------------------------------------------------------- */
 
   const moveToNextCriterion = useCallback(() => {
     const criterion = rubricCriteria[currentCriterionIndex];
@@ -642,20 +567,12 @@ export default function GradingWorkspace({
     teacherJustifications,
   ]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  moveToPreviousCriterion                                                    */
-  /* -------------------------------------------------------------------------- */
-
   const moveToPreviousCriterion = useCallback(() => {
     if (currentCriterionIndex <= 0) return;
     setCurrentCriterionIndex((prev) => prev - 1);
     setCriterionStartTime(Date.now());
     setActivePdfEvidence(null);
   }, [currentCriterionIndex]);
-
-  /* -------------------------------------------------------------------------- */
-  /*  finishGrading                                                              */
-  /* -------------------------------------------------------------------------- */
 
   const finishGrading = useCallback(async () => {
     const criterion = rubricCriteria[currentCriterionIndex];
@@ -754,10 +671,6 @@ export default function GradingWorkspace({
     onEssayGraded,
   ]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  restartGrading                                                             */
-  /* -------------------------------------------------------------------------- */
-
   const restartGrading = useCallback(() => {
     // Common state reset
     setCriteriaAssessments({});
@@ -781,7 +694,6 @@ export default function GradingWorkspace({
     } else {
       // Standalone: go back through the setup wizard
       setCurrentStep('welcome');
-      setEssayFile(null);
       setEssayFileName(null);
       setPdfContent('');
       if (!preloadedRubric) setRubricContent('');
@@ -794,13 +706,8 @@ export default function GradingWorkspace({
     }
   }, [studySession, preloadedEssay, pdfContent, rubricCriteria, gradeCurrentCriterion, preloadedRubric]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  gradeNextEssay                                                             */
-  /* -------------------------------------------------------------------------- */
-
   const gradeNextEssay = useCallback(() => {
     setCurrentStep('settings');
-    setEssayFile(null);
     setEssayFileName(null);
     setPdfContent('');
     setCriteriaAssessments({});
@@ -818,17 +725,10 @@ export default function GradingWorkspace({
     onRequestNextEssay?.();
   }, [onRequestNextEssay]);
 
-  /* -------------------------------------------------------------------------- */
-  /*  backToGrading — leave the summary, return to the per-criterion view        */
-  /* -------------------------------------------------------------------------- */
-
+  // Leave the summary and go back to the per-criterion view
   const backToGrading = useCallback(() => {
     setGradingComplete(false);
   }, []);
-
-  /* -------------------------------------------------------------------------- */
-  /*  updateHallucinationCounts                                                  */
-  /* -------------------------------------------------------------------------- */
 
   const updateHallucinationCounts = useCallback(
     (criterionName: string, counts: { detected: number; confirmed: number; reported: number }) => {
@@ -847,10 +747,6 @@ export default function GradingWorkspace({
     [],
   );
 
-  /* -------------------------------------------------------------------------- */
-  /*  RENDER                                                                     */
-  /* -------------------------------------------------------------------------- */
-
   return (
     <div className="relative flex h-full w-full flex-col" style={{ background: 'var(--background)' }}>
       {/* Step indicator (hidden during active grading/complete) */}
@@ -860,18 +756,14 @@ export default function GradingWorkspace({
 
       <div className="flex flex-1 flex-col overflow-y-auto">
         <AnimatePresence mode="wait">
-          {/* ============================================================== */}
-          {/*  Step 1: Welcome                                                */}
-          {/* ============================================================== */}
+          {/* Step 1: Welcome */}
           {currentStep === 'welcome' && (
             <motion.div key="welcome" {...slideVariants}>
               <WelcomeSection onContinue={() => setCurrentStep('rubric')} />
             </motion.div>
           )}
 
-          {/* ============================================================== */}
-          {/*  Step 2: Rubric                                                 */}
-          {/* ============================================================== */}
+          {/* Step 2: Rubric */}
           {currentStep === 'rubric' && (
             <motion.div key="rubric" {...slideVariants}>
               <StepContainer
@@ -930,9 +822,7 @@ export default function GradingWorkspace({
             </motion.div>
           )}
 
-          {/* ============================================================== */}
-          {/*  Step 3: Settings                                               */}
-          {/* ============================================================== */}
+          {/* Step 3: Settings */}
           {currentStep === 'settings' && (
             <motion.div key="settings" {...slideVariants}>
               <StepContainer
@@ -994,9 +884,7 @@ export default function GradingWorkspace({
             </motion.div>
           )}
 
-          {/* ============================================================== */}
-          {/*  Step 5: Active Grading / Step 6: Complete                      */}
-          {/* ============================================================== */}
+          {/* Grading and summary */}
           {(currentStep === 'grading' || currentStep === 'complete') && (
             <motion.div key="grading" {...slideVariants} className="flex h-full flex-1 flex-col overflow-hidden">
               {/* Header bar: back button + essay info */}
@@ -1054,7 +942,6 @@ export default function GradingWorkspace({
               <div className="flex min-w-0 flex-1 overflow-hidden">
               <div className="min-w-0 flex-1 overflow-hidden">
                 <InteractiveGrading
-                  pdfFile={essayFile}
                   pdfContent={pdfContent}
                   essayPrompt={preloadedEssay?.prompt ?? null}
                   rubricContent={rubricContent}

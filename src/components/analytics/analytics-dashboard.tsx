@@ -9,9 +9,6 @@ import {
 import type { GradeRecord } from '@/types';
 import RankingChart from './ranking-chart';
 
-// ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
 interface AnalyticsDashboardProps {
   records: GradeRecord[];
   teacherName: string;
@@ -19,9 +16,7 @@ interface AnalyticsDashboardProps {
   sessionId?: string | null;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers & animation
-// ---------------------------------------------------------------------------
+// Helpers
 const fmt = (s: number) => `${Math.floor(s / 60)}m ${s % 60}s`;
 
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.06 } } };
@@ -39,7 +34,7 @@ const TABS = [
 ] as const;
 type TabId = (typeof TABS)[number]['id'];
 
-// Reusable stat card
+// Stat card
 function StatCard({ label, value, icon, gradient, subtitle }: { label: string; value: string; icon: React.ReactNode; gradient: string; subtitle?: string }) {
   return (
     <motion.div variants={fade} className="flex items-center gap-4 rounded-xl p-5 shadow-sm"
@@ -54,9 +49,7 @@ function StatCard({ label, value, icon, gradient, subtitle }: { label: string; v
   );
 }
 
-// ---------------------------------------------------------------------------
-// Session Data Tab
-// ---------------------------------------------------------------------------
+// Session data tab
 function SessionDataTab({ records, onDownloadCSV }: { records: GradeRecord[]; onDownloadCSV: () => void }) {
   const stats = useMemo(() => {
     const n = records.length;
@@ -138,9 +131,7 @@ function SessionDataTab({ records, onDownloadCSV }: { records: GradeRecord[]; on
   );
 }
 
-// ---------------------------------------------------------------------------
-// Overview Tab (data-driven from records)
-// ---------------------------------------------------------------------------
+// Overview tab
 function OverviewTab({ records }: { records: GradeRecord[] }) {
   const stats = useMemo(() => {
     const essayIds = [...new Set(records.map(r => r.essay_id))];
@@ -379,9 +370,7 @@ function OverviewTab({ records }: { records: GradeRecord[] }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Agreement Tab — Inter-rater agreement analysis (teacher vs AI)
-// ---------------------------------------------------------------------------
+// Agreement tab: teacher vs AI
 function AgreementTab({ records }: { records: GradeRecord[] }) {
   const analysis = useMemo(() => {
     const paired = records.filter(r => r.teacher_score !== null && r.ai_score !== null);
@@ -580,9 +569,6 @@ function AgreementTab({ records }: { records: GradeRecord[] }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main Component
-// ---------------------------------------------------------------------------
 export default function AnalyticsDashboard({ records, teacherName, onDownloadCSV, sessionId }: AnalyticsDashboardProps) {
   const [activeTab, setActiveTab] = useState<TabId>('session');
 

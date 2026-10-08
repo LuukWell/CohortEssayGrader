@@ -20,10 +20,8 @@ import { RUBRIC_CRITERIA } from '@/lib/llm-config';
 // retrying the same hanging call. To force a retry, delete the row manually:
 //   DELETE FROM ai_assessment_cache WHERE ai_justification = '[PRECOMPUTE_FAILED]';
 const PRECOMPUTE_FAILED_SENTINEL = '[PRECOMPUTE_FAILED]';
-// Per-criterion LLM timeout. Overridable via env so users on slower hardware
-// (CPU-offloaded models, larger models) can give the model more headroom
-// without rebuilding. Default 180s — enough for ~7-8B models on a 4GB GPU
-// with partial CPU offload.
+// Per-criterion LLM timeout, can be raised via env on slower hardware.
+// 180s is enough for a 7-8B model on a 4GB GPU with partial CPU offload.
 const LLM_TIMEOUT_MS = Number(process.env.LLM_PRECOMPUTE_TIMEOUT_MS) || 180_000;
 
 const activeSessions = new Set<string>();
@@ -73,8 +71,7 @@ async function runPrecompute(
 ): Promise<void> {
   try {
     const essays = getEssaysBySession(sessionId);
-    // Use the same hardcoded criteria the grading workspace uses (RUBRIC_CRITERIA from llm-config).
-    // session.rubric_criteria_json is unused by the grading flow, so we mirror that source here.
+    // Same criteria as the grading workspace (session.rubric_criteria_json isn't used).
     const criteria = RUBRIC_CRITERIA;
     if (!essays.length || !criteria.length) {
       console.error('[precompute] No essays or criteria — nothing to precompute');
@@ -108,7 +105,7 @@ async function runPrecompute(
         if (useCached) {
           const cached = getCachedAssessment(tsvId, criterion.id, rubricHash, assessmentType, assessmentLength);
           if (cached) {
-            // Negative-cache sentinel: this pair previously failed/timed out — skip retry.
+            // Failed or timed out before, skip it.
             if (cached.ai_justification === PRECOMPUTE_FAILED_SENTINEL) {
               console.warn(`[precompute] Skipping (cached failure) essay=${essay.filename} criterion=${criterion.name}`);
               done++;
@@ -120,8 +117,7 @@ async function runPrecompute(
           }
         }
 
-        // Cache miss or caching disabled — call LLM (with a hard timeout so one
-        // hung call can't stall the entire batch).
+        // Not cached: call the LLM, with a timeout so one hung call can't stall the batch.
         if (aiScore === null && aiJustification === null) {
           try {
             const result = await Promise.race([
@@ -144,8 +140,8 @@ async function runPrecompute(
             aiJustification = justText;
             evidenceJson = JSON.stringify(result.evidence ?? []);
 
-            // If the LLM returned no usable score, treat as a failure: write the
-            // negative-cache sentinel and skip persisting a polluting null grade.
+            // No usable score counts as a failure: cache the sentinel and don't save
+            // a null grade.
             if (aiScore === null) {
               console.warn(`[precompute] LLM returned null score for essay=${essay.filename} criterion=${criterion.name} — negative-caching`);
               setCachedAssessment(tsvId, criterion.id, rubricHash, assessmentType, assessmentLength, {
@@ -164,7 +160,7 @@ async function runPrecompute(
             });
           } catch (err) {
             console.error(`[precompute] Failed essay=${essay.filename} criterion=${criterion.name}:`, err);
-            // Write negative-cache sentinel so subsequent sessions skip this pair
+            // Cache the failure so later sessions skip this pair.
             // instead of re-triggering the same hang/error.
             setCachedAssessment(tsvId, criterion.id, rubricHash, assessmentType, assessmentLength, {
               ai_score: null,

@@ -90,8 +90,7 @@ export function getRubricContent(): string {
   if (!fs.existsSync(RUBRIC_PATH)) {
     throw new Error(`Rubric file not found at ${RUBRIC_PATH}`);
   }
-  // Normalize CRLF → LF before trim — the rubric hash feeds the assessment cache key,
-  // and a Windows checkout would otherwise produce a different hash than a Unix one,
-  // causing every cache lookup to miss.
+  // Normalize CRLF to LF first. The rubric hash is part of the assessment cache key,
+  // so a Windows checkout would otherwise never hit the cache.
   return fs.readFileSync(RUBRIC_PATH, 'utf-8').replace(/\r\n/g, '\n').trim();
 }
